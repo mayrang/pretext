@@ -47,7 +47,7 @@ Internal notes for contributors and agents. Use `README.md` as the public source
 - Non-word, non-space segments are break opportunities, same as words.
 - CJK grapheme splitting plus kinsoku merging keeps prohibited punctuation attached to adjacent graphemes.
 - Emoji correction is auto-detected per font size, constant per emoji grapheme, and effectively font-independent.
-- Bidi levels are computed during `prepare()` and stored, but `layout()` does not currently consume them.
+- Bidi levels now stay on the rich `prepareWithSegments()` path. The opaque fast `prepare()` handle should not pay for bidi metadata that `layout()` does not consume.
 - Supported CSS target is the common app-text configuration: `white-space: normal`, `word-break: normal`, `overflow-wrap: break-word`, `line-break: auto`.
 - `system-ui` is unsafe for accuracy; canvas and DOM can resolve different fonts on macOS.
 - Thai historically mismatched because CSS and `Intl.Segmenter` use different internal dictionaries; keep it in the browser sweep when changing segmentation rules.

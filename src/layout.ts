@@ -1153,7 +1153,7 @@ declare const preparedTextBrand: unique symbol
 type PreparedCore = {
   widths: number[] // Segment widths, e.g. [42.5, 4.4, 37.2]
   kinds: SegmentBreakKind[] // Break behavior per segment, e.g. ['text', 'space', 'text']
-  segLevels: Int8Array | null // Bidi embedding level per segment, or null for pure LTR text
+  segLevels: Int8Array | null // Rich-path bidi embedding levels, else null
   breakableWidths: (number[] | null)[] // Grapheme widths for overflow-wrap segments, else null
   discretionaryHyphenWidth: number // Visible width added when a soft hyphen is chosen as the break
 }
@@ -1233,7 +1233,7 @@ function measureAnalysis(
 
   const widths: number[] = []
   const kinds: SegmentBreakKind[] = []
-  const segStarts: number[] = []
+  const segStarts = includeSegments ? [] as number[] : null
   const breakableWidths: (number[] | null)[] = []
   const segments = includeSegments ? [] as string[] : null
 
@@ -1246,7 +1246,7 @@ function measureAnalysis(
   ): void {
     widths.push(width)
     kinds.push(kind)
-    segStarts.push(start)
+    segStarts?.push(start)
     breakableWidths.push(breakable)
     if (segments !== null) segments.push(text)
   }
@@ -1315,7 +1315,7 @@ function measureAnalysis(
     }
   }
 
-  const segLevels = computeSegmentLevels(analysis.normalized, segStarts)
+  const segLevels = segStarts === null ? null : computeSegmentLevels(analysis.normalized, segStarts)
   if (segments !== null) {
     return { widths, kinds, segLevels, breakableWidths, discretionaryHyphenWidth, segments } as unknown as PreparedTextWithSegments
   }
@@ -1340,7 +1340,7 @@ function prepareInternal(text: string, font: string, includeSegments: boolean): 
 //   5. Measure each segment via canvas measureText, cache by (segment, font)
 //   6. Pre-measure graphemes of long words (for overflow-wrap: break-word)
 //   7. Correct emoji canvas inflation (auto-detected per font size)
-//   8. Compute bidi embedding levels for mixed-direction text
+//   8. Optionally compute bidi embedding levels for the rich path
 export function prepare(text: string, font: string): PreparedText {
   return prepareInternal(text, font, false) as PreparedText
 }
