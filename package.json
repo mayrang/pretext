@@ -68,6 +68,7 @@
     "corpus-taxonomy": "bun run scripts/corpus-taxonomy.ts",
     "generate:bidi-data": "bun run scripts/generate-bidi-data.ts",
     "keep-all-check": "bun run scripts/keep-all-check.ts",
+    "korean-check": "bun run scripts/korean-check.ts",
     "package-smoke-test": "bun run scripts/package-smoke-test.ts",
     "prepack": "rm -rf dist && tsc -p tsconfig.build.json",
     "pre-wrap-check": "bun run scripts/pre-wrap-check.ts",
