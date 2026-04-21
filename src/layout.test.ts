@@ -246,9 +246,15 @@ function getNonSpaceSegmentLevels(
 
 class TestCanvasRenderingContext2D {
   font = ''
+  letterSpacing = '0px'
 
   measureText(text: string): { width: number } {
-    return { width: measureWidth(text, this.font) }
+    const baseWidth = measureWidth(text, this.font)
+    const spacing = parseFloat(this.letterSpacing) || 0
+    if (spacing === 0) return { width: baseWidth }
+    let graphemeCount = 0
+    for (const _ of graphemeSegmenter.segment(text)) graphemeCount++
+    return { width: baseWidth + graphemeCount * spacing }
   }
 }
 
@@ -1251,5 +1257,50 @@ describe('layout invariants', () => {
         expect(counted).toBe(walked)
       }
     }
+  })
+
+  test('letterSpacing increases total prepared width', () => {
+    const base = prepareWithSegments('Hello World', FONT)
+    const spaced = prepareWithSegments('Hello World', FONT, { letterSpacing: '2px' })
+
+    let baseTotal = 0
+    let spacedTotal = 0
+    for (let i = 0; i < base.widths.length; i++) baseTotal += base.widths[i]!
+    for (let i = 0; i < spaced.widths.length; i++) spacedTotal += spaced.widths[i]!
+    expect(spacedTotal).toBeGreaterThan(baseTotal)
+  })
+
+  test('letterSpacing cache separation: different spacing = different widths', () => {
+    const a = prepareWithSegments('Test', FONT, { letterSpacing: '1px' })
+    const b = prepareWithSegments('Test', FONT, { letterSpacing: '3px' })
+
+    expect(a.widths[0]).not.toBe(b.widths[0])
+  })
+
+  test('omitted letterSpacing equals "0px" letterSpacing', () => {
+    const base = prepareWithSegments('Hello World', FONT)
+    const zero = prepareWithSegments('Hello World', FONT, { letterSpacing: '0px' })
+
+    expect(zero.widths).toEqual(base.widths)
+  })
+
+  test('letterSpacing causes more line breaks at narrow widths', () => {
+    const base = prepare('The quick brown fox', FONT)
+    const spaced = prepare('The quick brown fox', FONT, { letterSpacing: '5px' })
+
+    const baseLines = layout(base, 200, LINE_HEIGHT).lineCount
+    const spacedLines = layout(spaced, 200, LINE_HEIGHT).lineCount
+    expect(spacedLines).toBeGreaterThan(baseLines)
+  })
+
+  test('letterSpacing applies to CJK text', () => {
+    const base = prepareWithSegments('春天到了', FONT)
+    const spaced = prepareWithSegments('春天到了', FONT, { letterSpacing: '4px' })
+
+    let baseTotal = 0
+    let spacedTotal = 0
+    for (let i = 0; i < base.widths.length; i++) baseTotal += base.widths[i]!
+    for (let i = 0; i < spaced.widths.length; i++) spacedTotal += spaced.widths[i]!
+    expect(spacedTotal).toBeGreaterThan(baseTotal)
   })
 })
