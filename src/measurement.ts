@@ -127,12 +127,14 @@ export function textMayContainEmoji(text: string): boolean {
   return maybeEmojiRe.test(text)
 }
 
-function getEmojiCorrection(font: string, fontSize: number): number {
-  let correction = emojiCorrectionCache.get(font)
+function getEmojiCorrection(font: string, fontSize: number, letterSpacing?: string): number {
+  const cacheKey = letterSpacing ? `${font}:ls=${letterSpacing}` : font
+  let correction = emojiCorrectionCache.get(cacheKey)
   if (correction !== undefined) return correction
 
   const ctx = getMeasureContext()
   ctx.font = font
+  ;(ctx as any).letterSpacing = letterSpacing ?? '0px'
   const canvasW = ctx.measureText('\u{1F600}').width
   correction = 0
   if (
@@ -142,6 +144,7 @@ function getEmojiCorrection(font: string, fontSize: number): number {
   ) {
     const span = document.createElement('span')
     span.style.font = font
+    span.style.letterSpacing = letterSpacing ?? '0px'
     span.style.display = 'inline-block'
     span.style.visibility = 'hidden'
     span.style.position = 'absolute'
@@ -153,7 +156,7 @@ function getEmojiCorrection(font: string, fontSize: number): number {
       correction = canvasW - domW
     }
   }
-  emojiCorrectionCache.set(font, correction)
+  emojiCorrectionCache.set(cacheKey, correction)
   return correction
 }
 
@@ -263,16 +266,18 @@ export function getSegmentBreakableFitAdvances(
   return metrics.breakableFitAdvances
 }
 
-export function getFontMeasurementState(font: string, needsEmojiCorrection: boolean): {
+export function getFontMeasurementState(font: string, needsEmojiCorrection: boolean, letterSpacing?: string): {
   cache: Map<string, SegmentMetrics>
   fontSize: number
   emojiCorrection: number
 } {
   const ctx = getMeasureContext()
   ctx.font = font
-  const cache = getSegmentMetricCache(font)
+  ;(ctx as any).letterSpacing = letterSpacing ?? '0px'
+  const cacheKey = letterSpacing ? `${font}:ls=${letterSpacing}` : font
+  const cache = getSegmentMetricCache(cacheKey)
   const fontSize = parseFontSize(font)
-  const emojiCorrection = needsEmojiCorrection ? getEmojiCorrection(font, fontSize) : 0
+  const emojiCorrection = needsEmojiCorrection ? getEmojiCorrection(font, fontSize, letterSpacing) : 0
   return { cache, fontSize, emojiCorrection }
 }
 
