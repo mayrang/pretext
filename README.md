@@ -235,7 +235,13 @@ Pretext doesn't try to be a full font rendering engine (yet?). It currently targ
 - `{ wordBreak: 'keep-all' }` is supported too. It behaves like you'd expect for CJK/Hangul text, while keeping the same `overflow-wrap: break-word` fallback for overlong runs.
 - `system-ui` is unsafe for `layout()` accuracy on macOS. Use a named font.
 - Runtime requires `Intl.Segmenter` and Canvas 2D text measurement. Browsers or runtimes without `Intl.Segmenter` are currently unsupported.
-- CSS text features outside the canvas `font` shorthand, such as `letter-spacing`, `font-optical-sizing`, `font-feature-settings`, and standalone `font-variation-settings`, are not modeled separately. Variable-font axes only help when the active axis is reflected in the canvas font string, for example via weight.
+- `letter-spacing` is supported via the `letterSpacing` option in `prepare()`:
+
+  ```ts
+  const prepared = prepare(text, font, { letterSpacing: '2px' })
+  ```
+
+  Other CSS text features outside the canvas `font` shorthand, such as `font-optical-sizing`, `font-feature-settings`, and standalone `font-variation-settings`, are not modeled separately. These properties are not in the Canvas 2D spec. Variable-font axes only help when the active axis is reflected in the canvas font string, for example via weight.
 
 ## Develop
 
