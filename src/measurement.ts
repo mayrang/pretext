@@ -134,7 +134,7 @@ function getEmojiCorrection(font: string, fontSize: number, letterSpacing?: stri
 
   const ctx = getMeasureContext()
   ctx.font = font
-  ;(ctx as any).letterSpacing = letterSpacing ?? '0px'
+  ctx.letterSpacing = letterSpacing ?? '0px'
   const canvasW = ctx.measureText('\u{1F600}').width
   correction = 0
   if (
@@ -273,7 +273,7 @@ export function getFontMeasurementState(font: string, needsEmojiCorrection: bool
 } {
   const ctx = getMeasureContext()
   ctx.font = font
-  ;(ctx as any).letterSpacing = letterSpacing ?? '0px'
+  ctx.letterSpacing = letterSpacing ?? '0px'
   const cacheKey = letterSpacing ? `${font}:ls=${letterSpacing}` : font
   const cache = getSegmentMetricCache(cacheKey)
   const fontSize = parseFontSize(font)
