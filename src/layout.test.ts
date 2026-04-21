@@ -1303,4 +1303,15 @@ describe('layout invariants', () => {
     for (let i = 0; i < spaced.widths.length; i++) spacedTotal += spaced.widths[i]!
     expect(spacedTotal).toBeGreaterThan(baseTotal)
   })
+
+  test('letterSpacing applies to emoji text', () => {
+    const base = prepareWithSegments('Hello 😀🎉 World', FONT)
+    const spaced = prepareWithSegments('Hello 😀🎉 World', FONT, { letterSpacing: '2px' })
+
+    let baseTotal = 0
+    let spacedTotal = 0
+    for (let i = 0; i < base.widths.length; i++) baseTotal += base.widths[i]!
+    for (let i = 0; i < spaced.widths.length; i++) spacedTotal += spaced.widths[i]!
+    expect(spacedTotal).toBeGreaterThan(baseTotal)
+  })
 })
